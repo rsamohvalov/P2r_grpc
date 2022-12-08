@@ -19,26 +19,26 @@ set(_GRPC_GRPCPP gRPC::grpc++)
 set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
 
 # Proto file
-get_filename_component(p2r_proto "../protobuf/protos/P2r.proto" ABSOLUTE)
+get_filename_component(p2r_proto "protobuf/proto/P2r.proto" ABSOLUTE)
 get_filename_component(p2r_proto_path "${p2r_proto}" PATH)
 
 # Generated sources
-set(p2r_proto_srcs "../../../protobuf/classes/cpp/P2r.pb.cc")
-set(p2r_proto_hdrs "../../../protobuf/classes/cpp/P2r.pb.h")
-set(p2r_grpc_srcs "../../../protobuf/classes/cpp/P2r.grpc.pb.cc")
-set(p2r_grpc_hdrs "../../../protobuf/classes/cpp/P2r.grpc.pb.h")
+set(p2r_proto_srcs "../../protobuf/classes/P2r.pb.cc")
+set(p2r_proto_hdrs "../../protobuf/classes/P2r.pb.h")
+set(p2r_grpc_srcs "../../protobuf/classes/P2r.grpc.pb.cc")
+set(p2r_grpc_hdrs "../../protobuf/classes/P2r.grpc.pb.h")
 add_custom_command(
       OUTPUT "${p2r_proto_srcs}" "${p2r_proto_hdrs}" "${p2r_grpc_srcs}" "${p2r_grpc_hdrs}"
       COMMAND ${_PROTOBUF_PROTOC}
-      ARGS --grpc_out "../../../protobuf/classes/cpp/"
-        --cpp_out "../../../protobuf/classes/cpp/"
+      ARGS --grpc_out "../../protobuf/classes/"
+        --cpp_out "../../protobuf/classes/"
         -I "${p2r_proto_path}"
         --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
         "${p2r_proto}"
       DEPENDS "${p2r_proto}")
 
 # Include generated *.pb.h files
-include_directories("../../../protobuf/classes/cpp/")
+include_directories("../../protobuf/classes/")
 
 # Targets (client|server)
 foreach(_target
