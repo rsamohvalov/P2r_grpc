@@ -39,6 +39,7 @@ add_custom_command(
 
 # Include generated *.pb.h files
 include_directories("../../protobuf/classes/")
+#include_directories("/projects/gRPC/install/include")
 
 # Targets (client|server)
 foreach(_target
