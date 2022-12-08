@@ -8,12 +8,13 @@ using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
 
-using p2r::CauseResponse;
+using p2r::ConnectionId;
 using p2r::ReleaseRequest;
+using p2r::Response;
+using p2r::RestoreWarning;
 using p2r::SetupRequest;
-using p2r::SetupResponse;
+using p2r::TerminateCancel;
 using p2r::TerminateWarning;
-using p2r::Timeout;
 
 class P2rClient {
   public:

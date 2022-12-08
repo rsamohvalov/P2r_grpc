@@ -10,34 +10,37 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
-using p2r::CauseResponse;
+using p2r::ConnectionId;
 using p2r::ReleaseRequest;
+using p2r::Response;
+using p2r::RestoreWarning;
 using p2r::SetupRequest;
-using p2r::SetupResponse;
+using p2r::TerminateCancel;
 using p2r::TerminateWarning;
-using p2r::Timeout;
 
 class P2rServer final : public p2r::P2R::Service {
-  Status SetupConnection(ServerContext *context, const SetupRequest *request, SetupResponse *response) override {
-    response->cause = p2r::SUCCESS;
-    response->rm_id = 1;
+
+  Status P2rSetupConnection(ServerContext *context, const SetupRequest *request, Response *response) override  {
+    p2r::ConnectionId id( request->connection_id() );
+    id.set_rm_id(1);
+    response->set_cause(p2r::SUCCESS);
+    response->set_allocated_connection_id(&id);
     return Status::OK;
   }
-  Status ReleaseConnection(ServerContext *context, const ReleaseRequest *request, CauseResponse *response) override
-  {
-    response->cause = p2r::SUCCESS;
+  Status P2rReleaseConnection(ServerContext *context, const ReleaseRequest *request, Response *response) override  {
+    response->set_cause(p2r::SUCCESS);
     return Status::OK;
   }
-  Status TerminationWarning(ServerContext *context, const TerminateWarning *request, CauseResponse *response) override
-  {
+  Status P2rTerminateWarning(ServerContext *context, const TerminateWarning *request, Response *response) override  {
+    response->set_cause(p2r::SUCCESS);
     return Status::OK;
   }
-  Status TerminateWarningCancel(ServerContext *context, const TerminateWarning *request, CauseResponse *response) override
-  {
+  Status P2rTerminateWarningCancel(ServerContext *context, const TerminateCancel *request, Response *response) override {
+    response->set_cause(p2r::SUCCESS);
     return Status::OK;
   }
-  Status RestorationWarning(ServerContext *context, const Timeout *request, CauseResponse *response) override
-  {
+  Status P2rRestoreWarning(ServerContext *context, const RestoreWarning *request, Response *response) override  {
+    response->set_cause(p2r::SUCCESS);
     return Status::OK;
   }
 };
@@ -47,13 +50,9 @@ void RunServer() {
   P2rServer service;
 
   ServerBuilder builder;
-  // Listen on the given address without any authentication mechanism
   builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-  // Register "service" as the instance through which
-  // communication with client takes place
   builder.RegisterService(&service);
 
-  // Assembling the server
   std::unique_ptr<Server> server(builder.BuildAndStart());
   std::cout << "Server listening on port: " << server_address << std::endl;
 
