@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "protobuf/classes/P2r.grpc.pb.h"
+#include "protobuf/classes/cpp/P2r.grpc.pb.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;
