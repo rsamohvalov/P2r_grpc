@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "../protobuf/classes/cpp/P2r.grpc.pb.h"
+#include "protobuf/classes/P2r.grpc.pb.h"
 
 using grpc::Channel;
 using grpc::ClientContext;
