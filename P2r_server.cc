@@ -19,10 +19,13 @@ using p2r::Timeout;
 
 class P2rServer final : public p2r::P2R::Service {
   Status SetupConnection(ServerContext *context, const SetupRequest *request, SetupResponse *response) override {
+    response->cause = p2r::SUCCESS;
+    response->rm_id = 1;
     return Status::OK;
   }
   Status ReleaseConnection(ServerContext *context, const ReleaseRequest *request, CauseResponse *response) override
   {
+    response->cause = p2r::SUCCESS;
     return Status::OK;
   }
   Status TerminationWarning(ServerContext *context, const TerminateWarning *request, CauseResponse *response) override
