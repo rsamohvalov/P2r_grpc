@@ -17,8 +17,13 @@ enum TerminateReason {
 }
 
 message ConnectionId {
-    int32 fp_id = 1;
-    int32 rm_id = 2;
+    message ProtocolVersion {
+        int32 major = 1;
+        int32 minor = 2;
+    }
+    ProtocolVersion protocol_version = 1;
+    int32 fp_id = 2;
+    int32 rm_id = 3;
 }
 
 message Response {
