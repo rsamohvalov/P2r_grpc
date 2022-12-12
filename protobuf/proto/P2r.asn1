@@ -11,60 +11,70 @@ ConnectionId ::= SEQUENCE {
     rm-id INTEGER(0..255)
 }
 
-MessageType ::= INTEGER(0..255)
-
 Message ::= SEQUENCE {
     protocol-version ProtocolVersion,
-    messageType MessageType,
+    message-type MessageTypes,
     connection-id ConnectionId,
     parameters Parameters
 }
 
-id-p2r-connection-setup-request MessageType ::= 1
-id-p2r-connection-setup-response MessageType ::= 2
-id-p2r-connection-release MessageType ::= 3
-id-p2r-connection-release-ack MessageType ::= 4
-id-p2r-session-termination-warning MessageType ::= 5
-id-p2r-session-termination-warning-ack MessageType ::= 6
-id-p2r-session-termination-warning-cancel MessageType ::= 7
-id-p2r-session-restore-warning MessageType ::= 8
-id-p2r-session-restore-warning-ack MessageType ::= 9
+MessageTypes ::= ENUMERATED {
+    none (0),
+    id-p2r-connection-setup-request (1),
+    id-p2r-connection-setup-response (2),
+    id-p2r-connection-release (3),
+    id-p2r-connection-release-ack (4),
+    id-p2r-session-termination-warning (5),
+    id-p2r-session-termination-warning-ack (6),
+    id-p2r-session-termination-warning-cancel (7),
+    id-p2r-session-restore-warning (8),
+    id-p2r-session-restore-warning-ack (9),
+    ...
+}
 
-Cause ::= ENUMERATED {undefined, success, timeout, error, no-resources, ... }
-Reason ::= ENUMERATED { unknown, planned, unplanned, ...}
+Cause ::= ENUMERATED {undefined (0), success (1), timeout (2), error (3), no-resources (4), ... }
+Reason ::= ENUMERATED { unknown (0), planned (1), unplanned (2), ...}
 
 P2RConnectionSetupResponse ::= SEQUENCE {
-    cause Cause
+    cause Cause,
+    ...
 }
 
 P2RConnectionRelease ::= SEQUENCE {
-    reason UTF8String
+    reason UTF8String,
+    ...
 }
 
 P2RConnectionReleaseAck ::= SEQUENCE {
-    cause Cause
+    cause Cause,
+    ...
 }
 
 P2RSessionTerminationWarning ::= SEQUENCE {
     warning-id INTEGER(0..65535),
     reason Reason,
-    estimated-time INTEGER(0..255)
+    estimated-time INTEGER(0..255),
+    ...
 }
 
 P2RSessionTerminationWarningAck ::= SEQUENCE {
-    cause Cause
+    cause Cause,
+    ...
 }
 
 P2RSessionTerminationWarningCancel ::= SEQUENCE {
-    warning-id INTEGER(0..65535)
+    warning-id INTEGER(0..65535),
+    ...
 }
 
 P2RSessionRestoreWarning ::= SEQUENCE {
-   estimated-time INTEGER(0..255)
+   estimated-time INTEGER(0..255),
+    ...
 }
 
 P2RSessionRestoreWarningAck ::= SEQUENCE {
-    cause Cause
+    cause Cause,
+    ...
 }
 
 Parameters ::= CHOICE {
@@ -76,7 +86,8 @@ Parameters ::= CHOICE {
         session-termination-warning-ack P2RSessionTerminationWarningAck,
         session-termination-warning-cancel P2RSessionTerminationWarningCancel,
         session-restore-warning P2RSessionRestoreWarning,
-        session-restore-warning-ack P2RSessionRestoreWarningAck
+        session-restore-warning-ack P2RSessionRestoreWarningAck,
+        ...
 }
 
 END
