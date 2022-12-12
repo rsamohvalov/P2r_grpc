@@ -1,0 +1,241 @@
+openapi: 3.0.0
+info:
+  title: Сервис интерфейса P2r
+  description: |
+    Сервис для реализации процедур интерфейса P2r.
+  version: 1.0.
+servers:
+- url: "{apiRoot}/p2r-service/v1.0"
+  variables:
+    apiRoot:
+      description: Адрес подключения к сервису
+      default: http://localhost:8888
+paths:
+  /connections:
+    post:
+      tags:
+      - Connections
+      summary: Метод для установления P2r соединения
+      operationId: SetupConnection
+      requestBody:
+        description: Идентификатор ФЧ БРТК
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: '#/components/schemas/ConnectionId'
+        required: true
+      responses:
+        "200":
+          description: Соединение установлено
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/ConnectionId'
+        "504":
+          description: Таймаут выполнения запроса
+          content: {}
+        default:
+          description: Другие ошибки
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /connections/{rm_id}:
+    delete:
+      tags:
+      - Connection
+      summary: Метод для закрытия P2r соединения
+      operationId: ReleaseConnection
+      parameters:
+      - name: rm_id
+        in: path
+        description: Идентификатор ПММ
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+        example: 10
+      - name: fp_id
+        in: query
+        description: Идентификатор ФЧ БРТК
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: number
+        example: 1
+      - name: reason
+        in: query
+        description: Причина закрытия соединения
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - planned
+          - unplanned
+        example: planned
+      responses:
+        "200":
+          description: Соединение закрыто
+          content: {}
+        "404":
+          description: Соединение p2r не установлено
+          content: {}
+        default:
+          description: Другие ошибки
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /connections/{rm_id}/warnings:
+    post:
+      tags:
+      - Warnings
+      summary: Метод для отправки уведомлений
+      operationId: SendWarning
+      parameters:
+      - name: rm_id
+        in: path
+        description: Идентификатор ПММ
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+        example: 10
+      - name: fp_id
+        in: query
+        description: Идентификатор ФЧ БРТК
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: number
+        example: 1
+      - name: warning_type
+        in: query
+        description: Тип уведомления
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - terminate
+          - restore
+          default: terminate
+        example: terminate
+      requestBody:
+        description: Информация об уведомлении
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: '#/components/schemas/Warning'
+        required: true
+      responses:
+        "200":
+          description: Уведомление получено
+          content: {}
+        "404":
+          description: Соединение p2r не установлено
+          content: {}
+        default:
+          description: Другие ошибки
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /connections/{rm_id}/warnings/{warning_id}:
+    delete:
+      tags:
+      - Warnings
+      summary: Метод для отмены уведомлений
+      operationId: DeleteWarning
+      parameters:
+      - name: rm_id
+        in: path
+        description: Идентификатор ПММ
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+        example: 10
+      - name: warning_id
+        in: path
+        description: Идентификатор уведомления
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+        example: 100500
+      - name: fp_id
+        in: query
+        description: Идентификатор ФЧ БРТК
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: number
+        example: 1
+      responses:
+        "200":
+          description: Уведомление отменено
+          content: {}
+        "404":
+          description: Соединение p2r не установлено
+          content: {}
+        default:
+          description: Другие ошибки
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    ConnectionId:
+      type: object
+      properties:
+        fp_id:
+          type: number
+          description: Идентификатор ФЧ БРТК
+          example: 1
+        rm_id:
+          type: number
+          description: Идентификатор ПММ
+          example: 2
+      example:
+        fp_id: 1
+        rm_id: 2
+    Warning:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Идентификатор уведомления
+        time:
+          type: number
+          description: Время по наступления события в сек
+        reason:
+          type: string
+          description: Причина уведомления
+          enum:
+          - planned
+          - unplanned
+    Error:
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: 127
+        message:
+          type: string
+          example: Сеть недоступна
