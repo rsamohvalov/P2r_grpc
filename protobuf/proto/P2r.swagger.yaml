@@ -195,6 +195,65 @@ paths:
             application/json;charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Error'
+  /connections/{rm_id}/notify:
+    post:
+      tags:
+      - Notification
+      summary: Метод для отправки скорости канала
+      operationId: SendNotification
+      parameters:
+      - name: rm_id
+        in: path
+        description: Идентификатор ПММ
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+        example: 10
+      - name: fp_id
+        in: query
+        description: Идентификатор ФЧ БРТК
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: number
+        example: 1
+      - name: notification_type
+        in: query
+        description: Тип уведомления
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - terminate
+          - restore
+          default: terminate
+        example: terminate
+      requestBody:
+        description: Информация об уведомлении
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: '#/components/schemas/Notification'
+        required: true
+      responses:
+        "200":
+          description: Уведомление получено
+          content: {}
+        "404":
+          description: Соединение p2r не установлено
+          content: {}
+        default:
+          description: Другие ошибки
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     ConnectionId:
@@ -226,6 +285,10 @@ components:
           enum:
           - planned
           - unplanned
+    Notification:
+      type: object
+      properties:
+        speed: {type: number, description: скорость канала}
     Error:
       required:
       - code
