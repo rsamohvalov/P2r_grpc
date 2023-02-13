@@ -29,6 +29,7 @@ MessageTypes ::= ENUMERATED {
     id-p2r-session-termination-warning-cancel (7),
     id-p2r-session-restore-warning (8),
     id-p2r-session-restore-warning-ack (9),
+    id-p2r-speed-level-notification (10),
     ...
 }
 
@@ -77,6 +78,11 @@ P2RSessionRestoreWarningAck ::= SEQUENCE {
     ...
 }
 
+P2RSpeedLevelNotification ::= SEQUENCE {
+    speed REAL,
+    ...
+}
+
 Parameters ::= CHOICE {
         connection-setup-request NULL,
         connection-setup-response P2RConnectionSetupResponse,
@@ -87,6 +93,7 @@ Parameters ::= CHOICE {
         session-termination-warning-cancel P2RSessionTerminationWarningCancel,
         session-restore-warning P2RSessionRestoreWarning,
         session-restore-warning-ack P2RSessionRestoreWarningAck,
+        id-p2r-speed-level-notification P2RSpeedLevelNotification,
         ...
 }
 
