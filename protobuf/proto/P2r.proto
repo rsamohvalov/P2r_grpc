@@ -57,10 +57,15 @@ message RestoreWarning {
     int32 timeout = 2;
 }
 
+message SpeedNotification {
+    float speed = 1;
+}
+
 service P2R {
     rpc P2rSetupConnection( SetupRequest ) returns (Response);
     rpc P2rReleaseConnection( ReleaseRequest) returns (Response);
     rpc P2rTerminateWarning( TerminateWarning ) returns (Response);
     rpc P2rTerminateWarningCancel( TerminateCancel ) returns (Response);
     rpc P2rRestoreWarning( RestoreWarning ) returns (Response); 
+    rpc P2rSpeedLevelNotification(stream SpeedNotification) returns (Response);
 }
