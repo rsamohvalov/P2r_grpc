@@ -93,7 +93,7 @@ Parameters ::= CHOICE {
         session-termination-warning-cancel P2RSessionTerminationWarningCancel,
         session-restore-warning P2RSessionRestoreWarning,
         session-restore-warning-ack P2RSessionRestoreWarningAck,
-        id-p2r-speed-level-notification P2RSpeedLevelNotification,
+        speed-level-notification P2RSpeedLevelNotification,
         ...
 }
 
