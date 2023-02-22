@@ -11,26 +11,15 @@ using grpc::ServerContext;
 using grpc::Status;
 
 using p2r::ConnectionId;
-using p2r::ReleaseRequest;
 using p2r::Response;
 using p2r::RestoreWarning;
-using p2r::SetupRequest;
+using p2r::SpeedNotification;
 using p2r::TerminateCancel;
 using p2r::TerminateWarning;
 
-class P2rServer final : public p2r::P2R::Service {
 
-  Status P2rSetupConnection(ServerContext *context, const SetupRequest *request, Response *response) override  {
-    p2r::ConnectionId id( request->connection_id() );
-    id.set_rm_id(1);
-    response->set_cause(p2r::SUCCESS);
-    response->set_allocated_connection_id(&id);
-    return Status::OK;
-  }
-  Status P2rReleaseConnection(ServerContext *context, const ReleaseRequest *request, Response *response) override  {
-    response->set_cause(p2r::SUCCESS);
-    return Status::OK;
-  }
+class P2rServer final : public p2r::P2R::Service
+{
   Status P2rTerminateWarning(ServerContext *context, const TerminateWarning *request, Response *response) override  {
     response->set_cause(p2r::SUCCESS);
     return Status::OK;
@@ -40,6 +29,11 @@ class P2rServer final : public p2r::P2R::Service {
     return Status::OK;
   }
   Status P2rRestoreWarning(ServerContext *context, const RestoreWarning *request, Response *response) override  {
+    response->set_cause(p2r::SUCCESS);
+    return Status::OK;
+  }
+  Status P2rSpeedLevelNotification(ServerContext *context, ::grpc::ServerReader<SpeedNotification> *reader, Response *response) override
+  {
     response->set_cause(p2r::SUCCESS);
     return Status::OK;
   }

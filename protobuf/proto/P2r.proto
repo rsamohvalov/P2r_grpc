@@ -31,15 +31,6 @@ message Response {
     optional ConnectionId connection_id = 2;
 }
 
-message SetupRequest {
-    ConnectionId connection_id = 1;
-}
-
-message ReleaseRequest {
-    ConnectionId connection_id = 1;
-    optional string reason = 2;
-}
-
 message TerminateWarning {
     ConnectionId connection_id = 1;
     TerminateReason reason = 2;
@@ -62,8 +53,6 @@ message SpeedNotification {
 }
 
 service P2R {
-    rpc P2rSetupConnection( SetupRequest ) returns (Response);
-    rpc P2rReleaseConnection( ReleaseRequest) returns (Response);
     rpc P2rTerminateWarning( TerminateWarning ) returns (Response);
     rpc P2rTerminateWarningCancel( TerminateCancel ) returns (Response);
     rpc P2rRestoreWarning( RestoreWarning ) returns (Response); 
