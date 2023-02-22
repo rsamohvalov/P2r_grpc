@@ -1,3 +1,3 @@
 #!/bin/bash
 
-/projects/gRPC/install/bin/protoc --proto_path=protos --cpp_out=classes/cpp protos/P2r.proto
+/projects/gRPC/install/bin/protoc --proto_path=proto --cpp_out=classes/cpp proto/P2r.proto
