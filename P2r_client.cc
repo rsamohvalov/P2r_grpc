@@ -21,12 +21,14 @@ using p2r::ConnectionId_ProtocolVersion;
 class P2rClient
 {
 public:
-  P2rClient(std::shared_ptr<Channel> channel)
-      : stub_(p2r::P2R::NewStub(channel)) {}
+  P2rClient(std::shared_ptr<Channel> channel, int id)
+      : stub_(p2r::P2R::NewStub(channel)) {
+    fp_id = id;
+  }
 
   void FillHeader(ConnectionId& id, struct_ConnectionId& s_id, ConnectionId_ProtocolVersion* version)
   {
-    id.set_fp_id(s_id.fp_id);
+    id.set_fp_id(fp_id);
     id.set_rm_id(s_id.rm_id);
     version->set_major(s_id.ProtocolVersion.major);
     version->set_minor(s_id.ProtocolVersion.minor);
@@ -55,7 +57,13 @@ public:
     FillHeader(id, termination.connection_id, &version);
     terminate.set_allocated_connection_id(&id);
     Response response;
-    return stub_->P2rTerminateWarning(&context, terminate, &response);
+    ::grpc::Status status = stub_->P2rTerminateWarning(&context, terminate, &response);
+    if (status.ok()) {
+      if( response.cause() == p2r::Cause::SUCCESS ) {
+        rm_id = response.connection_id().rm_id();
+      }
+    }
+    return status;
   }
   ::grpc::Status SendTerminationCancel(struct_TerminateCancel cancelation ) {
     ::grpc::ClientContext context;
@@ -80,18 +88,20 @@ public:
 
 private:
   std::unique_ptr<p2r::P2R::Stub> stub_;
+  int fp_id;
+  int rm_id;
 };
 
 P2rClient *client;
 extern "C" 
 { 
 
-  void *RunClient(char *addr)
+  void *RunClient(char *addr, int fp_id)
   {
     std::string target_address(addr);
     try
     {
-      client = new P2rClient(grpc::CreateChannel(target_address, grpc::InsecureChannelCredentials()));
+      client = new P2rClient(grpc::CreateChannel(target_address, grpc::InsecureChannelCredentials()), fp_id);
     }
     catch (...)
     {

@@ -6,7 +6,7 @@ ApiCallTable callbacks;
 int SendSpeedNotification(struct_SpeedNotification speed, void *context);
 void *RunClient(char *addr);
 
-int RunServer(char *addr, ApiCallTable *callbacks);
+int RunServer(char *addr, ApiCallTable *callbacks, int id );
 
 void NotificationCallback(struct_SpeedNotification speed)
 {
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     callbacks.terminate_callback = TerminationCallback;
     callbacks.terminate_cancel_callback = TerminationCancelCallback;
     callbacks.restore_callback = RestoreCallback;
-    RunServer("0.0.0.0:50051", &callbacks);
+    RunServer("0.0.0.0:50051", &callbacks, 1 );
 
     void *context = RunClient("0.0.0.0:50051");
     if (!context)
