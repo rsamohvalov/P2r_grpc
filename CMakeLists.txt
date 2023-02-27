@@ -48,7 +48,7 @@ target_include_directories(P2r
 )
 
 add_executable( P2r_example
- P2r_example.c api/P2r_api.c ) 
+ P2r_example.c ) 
 
 target_link_libraries( P2r_example
   P2r )

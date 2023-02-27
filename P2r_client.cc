@@ -18,7 +18,7 @@ using p2r::TerminateCancel;
 using p2r::TerminateWarning;
 using p2r::ConnectionId_ProtocolVersion;
 
-    class P2rClient
+class P2rClient
 {
 public:
   P2rClient(std::shared_ptr<Channel> channel)
