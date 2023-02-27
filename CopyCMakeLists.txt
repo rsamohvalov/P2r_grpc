@@ -41,34 +41,14 @@ add_custom_command(
 include_directories("../../protobuf/classes/")
 #include_directories("/projects/gRPC/install/include")
 
-add_library( P2r STATIC
-             P2r_client.cc 
-             P2r_server.cc 
-             ${p2r_proto_srcs} 
-             ${p2r_grpc_srcs})
-target_link_libraries(P2r 
-                      ${_REFLECTION}
-                      ${_GRPC_GRPCPP}
-                      ${_PROTOBUF_LIBPROTOBUF})
-target_include_directories(P2r
-    PUBLIC
-        api
-)
-
-add_executable( P2r_example
- P2r_example.c api/P2r_api.c ) 
-
-target_link_libraries( P2r_example
-  P2r )
-
-             # Targets (client|server)
-#foreach(_target
-#  P2r_client P2r_server)
-#  add_executable(${_target} "${_target}.cc"
-#    ${p2r_proto_srcs}
-#    ${p2r_grpc_srcs})
-#  target_link_libraries(${_target}
-#    ${_REFLECTION}
-#    ${_GRPC_GRPCPP}
-#    ${_PROTOBUF_LIBPROTOBUF})
-#endforeach()
+# Targets (client|server)
+foreach(_target
+  P2r_client P2r_server)
+  add_executable(${_target} "${_target}.cc"
+    ${p2r_proto_srcs}
+    ${p2r_grpc_srcs})
+  target_link_libraries(${_target}
+    ${_REFLECTION}
+    ${_GRPC_GRPCPP}
+    ${_PROTOBUF_LIBPROTOBUF})
+endforeach()

@@ -6,4 +6,5 @@ then
     cd ..
     cd ..
     rm -rf cmake
+    rm -f libP2r.a
 fi
