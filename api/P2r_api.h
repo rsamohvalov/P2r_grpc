@@ -39,8 +39,14 @@ typedef struct _RestoreWarning
     int timeout;
 } struct_RestoreWarning;
 
-typedef void (*SpeedNotificationCallback)(float speed);
-typedef void (*SessionTerminationCallback)(struct_TerminateWarning termination);
+typedef struct _SpeedNotification
+{
+    struct_ConnectionId connection_id;
+    float speed;
+} struct_SpeedNotification;
+
+typedef void (*SpeedNotificationCallback)(struct_SpeedNotification speed);
+typedef int (*SessionTerminationCallback)(struct_TerminateWarning termination);
 typedef void (*SessionTerminationCancelCallback)(struct_TerminateCancel cancelation);
 typedef void (*SessionRestoreCallback)(struct_RestoreWarning restoration);
 

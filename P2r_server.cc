@@ -32,22 +32,44 @@ class P2rServer final : public p2r::P2R::Service
       api_callbacks.speed_notify_callback = callbacks.speed_notify_callback;
     }
   }
-
-  Status P2rTerminateWarning(ServerContext *context, const TerminateWarning *request, Response *response) override  {
-    response->set_cause(p2r::SUCCESS);
+  void FillHeader(struct_ConnectionId* s_id, ConnectionId id ) {
+    s_id->ProtocolVersion.major = id.protocol_version().major();
+    s_id->ProtocolVersion.minor = id.protocol_version().minor();
+    s_id->fp_id = id.fp_id();
+    s_id->rm_id = id.rm_id();
+  }
+      
+  Status P2rTerminateWarning(ServerContext *context, const TerminateWarning *request, Response *response) override
+  {
+    struct_TerminateWarning terminate;
+    FillHeader(&(terminate.connection_id), request->connection_id());
+    if( !api_callbacks.terminate_callback(terminate) ) {
+      response->set_cause(p2r::SUCCESS);
+    }
+    else {
+      response->set_cause(p2r::ERROR);
+    }
     return Status::OK;
   }
   Status P2rTerminateWarningCancel(ServerContext *context, const TerminateCancel *request, ::google::protobuf::Empty *response) override
   {
+    struct_TerminateCancel cancel;
+    FillHeader(&(cancel.connection_id), request->connection_id());
+    api_callbacks.terminate_cancel_callback(cancel);
     return Status::OK;
   }
   Status P2rRestoreWarning(ServerContext *context, const RestoreWarning *request, ::google::protobuf::Empty *response) override
   {
+    struct_RestoreWarning restore;
+    FillHeader(&(restore.connection_id), request->connection_id());
+    api_callbacks.restore_callback(restore);
     return Status::OK;
   }
   Status P2rSpeedLevelNotification(ServerContext *context, const SpeedNotification *request, ::google::protobuf::Empty *response) override
   {
-    api_callbacks.speed_notify_callback(request->speed());
+    struct_SpeedNotification speed_notify;
+    FillHeader(&(speed_notify.connection_id), request->connection_id());
+    api_callbacks.speed_notify_callback(speed_notify);
     return Status::OK;
   }
 };

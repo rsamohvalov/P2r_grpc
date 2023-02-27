@@ -51,7 +51,8 @@ message RestoreWarning {
 }
 
 message SpeedNotification {
-    float speed = 1;
+    ConnectionId connection_id = 1;
+    float speed = 2;
 }
 
 service P2R {
