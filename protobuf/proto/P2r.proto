@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package p2r;
 
+import "google/protobuf/empty.proto";
+
 enum Cause {
     UNDEFINED = 0;
     SUCCESS = 1;
@@ -53,8 +55,8 @@ message SpeedNotification {
 }
 
 service P2R {
-    rpc P2rTerminateWarning( TerminateWarning ) returns (Response);
-    rpc P2rTerminateWarningCancel( TerminateCancel ) returns (Response);
-    rpc P2rRestoreWarning( RestoreWarning ) returns (Response); 
-    rpc P2rSpeedLevelNotification(stream SpeedNotification) returns (Response);
+    rpc P2rTerminateWarning( TerminateWarning ) returns (Response) {}
+    rpc P2rTerminateWarningCancel( TerminateCancel ) returns (google.protobuf.Empty) {}
+    rpc P2rRestoreWarning( RestoreWarning ) returns (google.protobuf.Empty) {}
+    rpc P2rSpeedLevelNotification(SpeedNotification) returns (google.protobuf.Empty) {}
 }

@@ -20,21 +20,21 @@ using p2r::TerminateWarning;
 
 class P2rServer final : public p2r::P2R::Service
 {
+
   Status P2rTerminateWarning(ServerContext *context, const TerminateWarning *request, Response *response) override  {
     response->set_cause(p2r::SUCCESS);
     return Status::OK;
   }
-  Status P2rTerminateWarningCancel(ServerContext *context, const TerminateCancel *request, Response *response) override {
-    response->set_cause(p2r::SUCCESS);
-    return Status::OK;
-  }
-  Status P2rRestoreWarning(ServerContext *context, const RestoreWarning *request, Response *response) override  {
-    response->set_cause(p2r::SUCCESS);
-    return Status::OK;
-  }
-  Status P2rSpeedLevelNotification(ServerContext *context, ::grpc::ServerReader<SpeedNotification> *reader, Response *response) override
+  Status P2rTerminateWarningCancel(ServerContext *context, const TerminateCancel *request, ::google::protobuf::Empty *response) override
   {
-    response->set_cause(p2r::SUCCESS);
+    return Status::OK;
+  }
+  Status P2rRestoreWarning(ServerContext *context, const RestoreWarning *request, ::google::protobuf::Empty *response) override
+  {
+    return Status::OK;
+  }
+  Status P2rSpeedLevelNotification(ServerContext *context, const SpeedNotification *request, ::google::protobuf::Empty *response) override
+  {
     return Status::OK;
   }
 };
