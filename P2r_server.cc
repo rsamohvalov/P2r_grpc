@@ -56,41 +56,55 @@ class P2rServer final : public p2r::P2R::Service
   Status P2rTerminateWarning(ServerContext *context, const TerminateWarning *request, Response *response) override
   {
     struct_TerminateWarning terminate;
-    
+
+    std::cout << "server P2rTerminateWarning enter\n";
+
     if( !api_callbacks.terminate_callback(terminate) ) {
       response->set_cause(p2r::SUCCESS);
-      ConnectionId id;
-      ConnectionId_ProtocolVersion version;
-      version.set_major(1);
-      version.set_minor(0);
-      id.set_allocated_protocol_version(&version);
-      id.set_rm_id(rm_id);
-      id.set_fp_id(request->connection_id().fp_id());
-      response->set_allocated_connection_id(&id);
+      ConnectionId* id = new ConnectionId();
+      ConnectionId_ProtocolVersion* version = new ConnectionId_ProtocolVersion();
+      version->set_major(this->proto_major);
+      version->set_minor(this->proto_minor);
+      id->set_allocated_protocol_version(version);
+      id->set_rm_id(this->rm_id);
+      id->set_fp_id(request->connection_id().fp_id());
+      response->set_allocated_connection_id(id);
+      std::cout << "Server P2rTerminateWarning response\n";
     }
     else {
       response->set_cause(p2r::ERROR);
     }
+    std::cout << "Server P2rTerminateWarning exit\n";
+
     return Status::OK;
   }
   Status P2rTerminateWarningCancel(ServerContext *context, const TerminateCancel *request, ::google::protobuf::Empty *response) override
   {
     struct_TerminateCancel cancel;
-    
+    std::cout << "Server P2rTerminateWarningCancel\n";
+
+    cancel.fp_id = request->connection_id().fp_id();
+    cancel.warning_id = request->warning_id();
     api_callbacks.terminate_cancel_callback(cancel);
     return Status::OK;
   }
   Status P2rRestoreWarning(ServerContext *context, const RestoreWarning *request, ::google::protobuf::Empty *response) override
   {
     struct_RestoreWarning restore;
-    
+    std::cout << "Server P2rRestoreWarning\n";
+
+    restore.fp_id = request->connection_id().fp_id();
+    restore.timeout = request->timeout();
     api_callbacks.restore_callback(restore);
     return Status::OK;
   }
   Status P2rSpeedLevelNotification(ServerContext *context, const SpeedNotification *request, ::google::protobuf::Empty *response) override
   {
     struct_SpeedNotification speed_notify;
-    
+    std::cout << "Server P2rSpeedLevelNotification\n";
+
+    speed_notify.fp_id = request->connection_id().fp_id();
+    speed_notify.speed = request->speed();
     api_callbacks.speed_notify_callback(speed_notify);
     return Status::OK;
   }

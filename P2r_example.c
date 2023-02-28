@@ -84,14 +84,14 @@ int main(int argc, char *argv[])
 
     ////////////////////////
     
-      /*  pthread_t server_thread;
+        pthread_t server_thread;
         unsigned short port = 6666;
         if (pthread_create(&server_thread, NULL, ServerThread, &port) < 0)
         {
             perror("could not create thread");
         }
     
-    sleep(1);*/
+    sleep(1);
     {
         pthread_t client_thread;
         if (pthread_create(&client_thread, NULL, ClientThread, NULL) < 0)
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            pthread_join(client_thread, 0);
+            pthread_join(server_thread, 0);
         }
     }
     return 0;

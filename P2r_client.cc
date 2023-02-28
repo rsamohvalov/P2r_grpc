@@ -36,7 +36,7 @@ public:
     connId->set_allocated_protocol_version(protoVersion);
   }
 
-  ::grpc::Status SendP2RSpeedLevelNotification(double speed)
+  ::grpc::Status SendP2RSpeedLevelNotification(float speed)
   {
     SpeedNotification speed_notify;
     speed_notify.set_allocated_connection_id(connId);
@@ -49,7 +49,7 @@ public:
     return status;
   }
 
-  ::grpc::Status SendP2RSessionTerminationWarning( long time, long warning_id, int reason) {
+  ::grpc::Status SendP2RSessionTerminationWarning( int time, int warning_id, int reason) {
     TerminateWarning terminate;
     terminate.set_warning_id(warning_id);
     terminate.set_timeout(time);    
@@ -75,7 +75,7 @@ public:
     return status;
   }
 
-  ::grpc::Status SendP2RSessionTerminationWarningCancel(long warning_id )
+  ::grpc::Status SendP2RSessionTerminationWarningCancel(int warning_id )
   {
     ::grpc::ClientContext context;
     ::google::protobuf::Empty response;
@@ -88,16 +88,7 @@ public:
     return status;
   }
 
-  ::grpc::Status SendP2RSessionTerminationWarningCancel(long warning_id, const TerminateCancel &cancel, ::google::protobuf::Empty *response)
-  {
-    ::grpc::ClientContext context;
-    std::cout << "client SendP2RSessionTerminationWarningCancel\n";
-    ::grpc::Status status = stub_->P2rTerminateWarningCancel(&context, cancel, response);
-    std::cout << "client after SendP2RSessionTerminationWarningCancel: " << status.error_message() << " \n";
-    return status;
-  }
-
-  ::grpc::Status SendP2RSessionRestoreWarning(long time) {
+  ::grpc::Status SendP2RSessionRestoreWarning(int time) {
     ::grpc::ClientContext context;
     ::google::protobuf::Empty response;
     RestoreWarning restore;
@@ -171,7 +162,7 @@ extern "C"
       return ret_val::Error;
     }
     //::grpc::Status status = ((P2rClient *)context)->SendSpeedNotification(speed);
-    ::grpc::Status status = client->SendP2RSpeedLevelNotification(speed);
+    ::grpc::Status status = client->SendP2RSpeedLevelNotification((float)speed);
     if (status.ok())
     {
       return ret_val::Success;
@@ -188,7 +179,7 @@ extern "C"
       return ret_val::Error;
     }
     //::grpc::Status status = ((P2rClient *)context)->SendTermination(termination);
-    ::grpc::Status status = client->SendP2RSessionTerminationWarning( time, warning_id, reason);
+    ::grpc::Status status = client->SendP2RSessionTerminationWarning( (int)time, (int)warning_id, reason);
     std::cout << "api SendP2RSessionTerminationWarning: " << status.error_message() << " \n";
     if (status.ok())
     {
@@ -209,25 +200,10 @@ extern "C"
       return ret_val::Error;
     }
 
-    /*ConnectionId connId;
-    connId.set_fp_id(1);
-    ConnectionId_ProtocolVersion protoVersion;
-    protoVersion.set_major(1);
-    protoVersion.set_minor(0);
-    connId.set_allocated_protocol_version(&protoVersion);*/
-    
-    /*::google::protobuf::Empty response;
-    TerminateCancel cancel;
-    cancel.set_allocated_connection_id(client->connId);
-    cancel.set_warning_id(warning_id);
-    std::cout << "client SendP2RSessionTerminationWarningCancel\n";*/
     std::cout << "client SendP2RSessionTerminationWarningCancel\n";
 
-    ::grpc::Status status = client->SendP2RSessionTerminationWarningCancel(warning_id);
-    //::grpc::Status status = client->SendP2RSessionTerminationWarningCancel(warning_id, cancel, &response );
+    ::grpc::Status status = client->SendP2RSessionTerminationWarningCancel((int)warning_id);
     std::cout << "api SendP2RSessionTerminationWarningCancel: " << status.error_message() << " \n";
-    //connId.release_protocol_version();
-    //cancel.release_connection_id();
     if (status.ok())
     {
       return ret_val::Success;
@@ -236,14 +212,13 @@ extern "C"
   }
 
   ret_val SendP2RSessionRestoreWarning(long time) 
-  //int SendRetore(struct_RestoreWarning restoration, void *context)
   {
     if (!client)
     {
       return ret_val::Error;
     }
     //::grpc::Status status = ((P2rClient *)context)->SendRetore(restoration);
-    ::grpc::Status status = client->SendP2RSessionRestoreWarning(time);
+    ::grpc::Status status = client->SendP2RSessionRestoreWarning((int)time);
     if (status.ok())
     {
       return ret_val::Success;
