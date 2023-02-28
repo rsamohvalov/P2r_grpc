@@ -27,7 +27,7 @@ public:
 
   P2rClient(std::shared_ptr<Channel> channel, int id)
       : stub_(p2r::P2R::NewStub(channel)) {
-    std::cout << "constructor\n";
+    //std::cout << "constructor\n";
     connId = new ConnectionId();
     connId->set_fp_id(id);
     protoVersion = new ConnectionId_ProtocolVersion();
@@ -57,21 +57,21 @@ public:
     terminate.set_allocated_connection_id(connId);
     ::grpc::ClientContext context;
     Response response;
-    std::cout << "client SendP2RSessionTerminationWarning\n";
+    //std::cout << "client SendP2RSessionTerminationWarning\n";
     ::grpc::Status status = stub_->P2rTerminateWarning(&context, terminate, &response);
-    std::cout << "client after SendP2RSessionTerminationWarning: " << status.error_message() << " \n";
+    //std::cout << "client after SendP2RSessionTerminationWarning: " << status.error_message() << " \n";
     terminate.release_connection_id();
     if (status.ok())
     {
-      std::cout << "client SendP2RSessionTerminationWarning status OK\n";
+      //std::cout << "client SendP2RSessionTerminationWarning status OK\n";
       if (response.cause() == p2r::Cause::SUCCESS)
       {
-        std::cout << "client SendP2RSessionTerminationWarning cause OK\n";
+        //std::cout << "client SendP2RSessionTerminationWarning cause OK\n";
         rm_id = response.connection_id().rm_id();
         return grpc::Status::OK;
       }
     }
-    std::cout << "client SendP2RSessionTerminationWarning return\n";
+    //std::cout << "client SendP2RSessionTerminationWarning return\n";
     return status;
   }
 
@@ -82,7 +82,7 @@ public:
     TerminateCancel cancel;
     cancel.set_allocated_connection_id(connId);
     cancel.set_warning_id(warning_id);
-    std::cout << "client SendP2RSessionTerminationWarningCancel\n";
+    //std::cout << "client SendP2RSessionTerminationWarningCancel\n";
     ::grpc::Status status = stub_->P2rTerminateWarningCancel(&context, cancel, &response);
     cancel.release_connection_id();
     return status;
@@ -173,14 +173,14 @@ extern "C"
   ret_val SendP2RSessionTerminationWarning(long time, long warning_id, int reason)
   //int SendTermination(struct_TerminateWarning termination, void *context)
   {
-    std::cout << "SendP2RSessionTerminationWarning\n";
+   // std::cout << "SendP2RSessionTerminationWarning\n";
     if (!client)
     {
       return ret_val::Error;
     }
     //::grpc::Status status = ((P2rClient *)context)->SendTermination(termination);
     ::grpc::Status status = client->SendP2RSessionTerminationWarning( (int)time, (int)warning_id, reason);
-    std::cout << "api SendP2RSessionTerminationWarning: " << status.error_message() << " \n";
+    //std::cout << "api SendP2RSessionTerminationWarning: " << status.error_message() << " \n";
     if (status.ok())
     {
       return ret_val::Success;
@@ -200,10 +200,10 @@ extern "C"
       return ret_val::Error;
     }
 
-    std::cout << "client SendP2RSessionTerminationWarningCancel\n";
+    //std::cout << "client SendP2RSessionTerminationWarningCancel\n";
 
     ::grpc::Status status = client->SendP2RSessionTerminationWarningCancel((int)warning_id);
-    std::cout << "api SendP2RSessionTerminationWarningCancel: " << status.error_message() << " \n";
+    //std::cout << "api SendP2RSessionTerminationWarningCancel: " << status.error_message() << " \n";
     if (status.ok())
     {
       return ret_val::Success;

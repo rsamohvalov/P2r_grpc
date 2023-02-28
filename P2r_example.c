@@ -10,20 +10,20 @@ ApiCallTable callbacks;
 
 void NotificationCallback(struct_SpeedNotification speed)
 {
-    printf("Server Got speed notification: %2f\n", speed.speed);
+    printf("Server Got speed notification from %d: %2f\n", speed.fp_id, speed.speed);
 }
 
 int TerminationCallback(struct_TerminateWarning termination) {
-    printf("Server Got TerminationCallback: %d\n", termination.warning_id);
+    printf("Server Got TerminationCallback from %d: %d\n", termination.fp_id, termination.warning_id);
     return 0;
 }
 
 void TerminationCancelCallback(struct_TerminateCancel cancelation) {
-    printf("Server Got TerminationCancelCallback: %d\n", cancelation.warning_id);
+    printf("Server Got TerminationCancelCallback from %d: %d\n", cancelation.fp_id, cancelation.warning_id);
 }
 
 void RestoreCallback(struct_RestoreWarning restoration) {
-    printf("Server Got RestoreCallback: %d\n", restoration.timeout);
+    printf("Server Got RestoreCallback from %d: %d\n", restoration.fp_id, restoration.timeout);
 }
 
 
@@ -36,7 +36,7 @@ void* ServerThread(void* param) {
     return 0;
 }
 
-void *ClientThread(void *param)
+void *ClientThread1(void *param)
 {
     //void *context = NULL;
     ret_val ret = P2rClientInit(1, "127.0.0.1", 50051 );
@@ -76,8 +76,48 @@ void *ClientThread(void *param)
 
     ret = SendP2RSpeedLevelNotification(100.4);
     printf("SendP2RSpeedLevelNotification ret = %d\n", ret);
+
+    ret = P2rClientInit(2, "127.0.0.1", 50051);
+    if (ret != Success)
+    {
+        return 0;
+    }
+    ret = SendP2RSessionTerminationWarning(100, 333, 1);
+    printf("SendP2RSessionTerminationWarning ret = %d\n", ret);
+    // sleep(1);
+    ret = SendP2RSessionTerminationWarningCancel(333);
+    printf("SendP2RSessionTerminationWarningCancel ret = %d\n", ret);
+    // sleep(1);
+    ret = SendP2RSessionTerminationWarning(0, 4444, 2);
+    printf("SendP2RSessionTerminationWarning ret = %d\n", ret);
+    // sleep(1);
+    ret = SendP2RSessionRestoreWarning(222);
+    printf("SendP2RSessionRestoreWarning ret = %d\n", ret);
+    // sleep(1);
+    ret = SendP2RSpeedLevelNotification(111.1);
+    printf("SendP2RSpeedLevelNotification ret = %d\n", ret);
+    // sleep(1);
+    ret = SendP2RSpeedLevelNotification(22.22);
+    printf("SendP2RSpeedLevelNotification ret = %d\n", ret);
+    // sleep(1);
+    ret = SendP2RSpeedLevelNotification(3.333);
+    printf("SendP2RSpeedLevelNotification ret = %d\n", ret);
+    // sleep(1);
+    ret = SendP2RSpeedLevelNotification(134.44);
+    printf("SendP2RSpeedLevelNotification ret = %d\n", ret);
+    // sleep(1);
+    ret = SendP2RSessionTerminationWarning(111, 222, 1);
+    printf("SendP2RSessionTerminationWarning ret = %d\n", ret);
+    // sleep(1);
+    ret = P2rClientRelease();
+    printf("P2rClientRelease ret = %d\n", ret);
+
+    ret = SendP2RSpeedLevelNotification(200.4);
+    printf("SendP2RSpeedLevelNotification ret = %d\n", ret);
+    
     return 0;
 }
+
 
 int main(int argc, char *argv[])
 {
@@ -93,10 +133,10 @@ int main(int argc, char *argv[])
     
     sleep(1);
     {
-        pthread_t client_thread;
-        if (pthread_create(&client_thread, NULL, ClientThread, NULL) < 0)
+        pthread_t client_thread1;
+        if (pthread_create(&client_thread1, NULL, ClientThread1, NULL) < 0)
         {
-            perror("could not create thread");
+            perror("could not create 1 thread");
         }
         else
         {
