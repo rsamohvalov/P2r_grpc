@@ -11,158 +11,179 @@ using grpc::ClientContext;
 using grpc::Status;
 
 using p2r::ConnectionId;
+using p2r::ConnectionId_ProtocolVersion;
 using p2r::Response;
 using p2r::RestoreWarning;
 using p2r::SpeedNotification;
 using p2r::TerminateCancel;
+using p2r::TerminateReason;
 using p2r::TerminateWarning;
-using p2r::ConnectionId_ProtocolVersion;
 
 class P2rClient
 {
 public:
   P2rClient(std::shared_ptr<Channel> channel, int id)
       : stub_(p2r::P2R::NewStub(channel)) {
-    fp_id = id;
+    connId.set_fp_id(id);
+    protoVersion.set_major(1);
+    protoVersion.set_minor(0);
+    connId.set_allocated_protocol_version(&protoVersion);
   }
 
-  void FillHeader(ConnectionId& id, struct_ConnectionId& s_id, ConnectionId_ProtocolVersion* version)
+  ::grpc::Status SendP2RSpeedLevelNotification(double speed)
   {
-    id.set_fp_id(fp_id);
-    id.set_rm_id(s_id.rm_id);
-    version->set_major(s_id.ProtocolVersion.major);
-    version->set_minor(s_id.ProtocolVersion.minor);
-    id.set_allocated_protocol_version(version);
-  }
-
-  ::grpc::Status SendSpeedNotification(struct_SpeedNotification speed)
-  {
-    SpeedNotification speed_notify;    
-    ConnectionId id;
-    p2r::ConnectionId_ProtocolVersion version;
-    FillHeader(id, speed.connection_id, &version );
-    speed_notify.set_allocated_connection_id(&id);
-    speed_notify.set_speed(speed.speed);
+    SpeedNotification speed_notify;
+    speed_notify.set_allocated_connection_id(&connId);
+    speed_notify.set_speed((float)speed);
 
     ::grpc::ClientContext context;
     ::google::protobuf::Empty response;
-    return stub_->P2rSpeedLevelNotification(&context, speed_notify, &response );
+    return stub_->P2rSpeedLevelNotification(&context, speed_notify, &response);
   }
 
-  ::grpc::Status SendTermination(struct_TerminateWarning termination) {
-    ::grpc::ClientContext context;
+  ::grpc::Status SendP2RSessionTerminationWarning( long time, long warning_id, int reason) {
     TerminateWarning terminate;
-    ConnectionId id;
-    p2r::ConnectionId_ProtocolVersion version;
-    FillHeader(id, termination.connection_id, &version);
-    terminate.set_allocated_connection_id(&id);
+    terminate.set_warning_id(warning_id);
+    terminate.set_timeout(time);    
+    terminate.set_reason((TerminateReason)reason);
+    terminate.set_allocated_connection_id(&connId);
+    ::grpc::ClientContext context;
     Response response;
     ::grpc::Status status = stub_->P2rTerminateWarning(&context, terminate, &response);
-    if (status.ok()) {
-      if( response.cause() == p2r::Cause::SUCCESS ) {
+    if (status.ok())
+    {
+      if (response.cause() == p2r::Cause::SUCCESS)
+      {
         rm_id = response.connection_id().rm_id();
+        return grpc::Status::OK;
       }
     }
     return status;
   }
-  ::grpc::Status SendTerminationCancel(struct_TerminateCancel cancelation ) {
+
+  ::grpc::Status SendP2RSessionTerminationWarningCancel(long warning_id)
+  {
     ::grpc::ClientContext context;
     ::google::protobuf::Empty response;
     TerminateCancel cancel;
-    ConnectionId id;
-    p2r::ConnectionId_ProtocolVersion version;
-    FillHeader(id, cancelation.connection_id, &version);
-    cancel.set_allocated_connection_id(&id);
+    cancel.set_allocated_connection_id(&connId);
+    cancel.set_warning_id(warning_id);
     return stub_->P2rTerminateWarningCancel(&context, cancel, &response);
   }
-  ::grpc::Status SendRetore(struct_RestoreWarning restoration) {
+
+  ::grpc::Status SendP2RSessionRestoreWarning(long time) {
     ::grpc::ClientContext context;
     ::google::protobuf::Empty response;
     RestoreWarning restore;
-    ConnectionId id;
-    p2r::ConnectionId_ProtocolVersion version;
-    FillHeader(id, restoration.connection_id, &version);
-    restore.set_allocated_connection_id(&id);
+    restore.set_timeout(time);
+    restore.set_allocated_connection_id(&connId);
     return stub_->P2rRestoreWarning(&context, restore, &response);
   }
 
 private:
   std::unique_ptr<p2r::P2R::Stub> stub_;
+  ConnectionId_ProtocolVersion protoVersion;
+  ConnectionId connId;
   int fp_id;
   int rm_id;
 };
 
-P2rClient *client;
+P2rClient *client = NULL;
 extern "C" 
-{ 
+{
 
-  void *RunClient(char *addr, int fp_id)
+  ret_val P2rClientInit(long id, const char *server, unsigned short port )
+  //void *RunClient(char *addr, int fp_id)
   {
-    std::string target_address(addr);
+    if( client ) {
+      return ret_val::TransportInitError;
+    }
+    std::string target_address(server);
     try
     {
-      client = new P2rClient(grpc::CreateChannel(target_address, grpc::InsecureChannelCredentials()), fp_id);
+      client = new P2rClient(grpc::CreateChannel(target_address, grpc::InsecureChannelCredentials()), id);
     }
     catch (...)
     {
-      return 0;
+      return ret_val::Error;
     }
-    return client;
+    return ret_val::Success;
   }
 
-  int SendSpeedNotification(struct_SpeedNotification speed, void *context)
+  ret_val P2rClientRelease()
   {
-    if (!context)
+    if (client)
     {
-      return -1;
+      delete client;
     }
-    ::grpc::Status status = ((P2rClient *)context)->SendSpeedNotification(speed);
-    if (status.ok())
-    {
-      return 0;
-    }
-    return -2;
+    return ret_val::Success;
   }
 
-  int SendTermination(struct_TerminateWarning termination, void *context)
+  ret_val SendP2RSpeedLevelNotification(double speed)
+  //  int SendSpeedNotification(struct_SpeedNotification speed, void *context)
   {
-    if (!context)
+    if (!client)
     {
-      return -1;
+      return ret_val::Error;
     }
-    ::grpc::Status status = ((P2rClient *)context)->SendTermination(termination);
+    //::grpc::Status status = ((P2rClient *)context)->SendSpeedNotification(speed);
+    ::grpc::Status status = client->SendP2RSpeedLevelNotification(speed);
     if (status.ok())
     {
-      return 0;
+      return ret_val::Success;
     }
-    return -2;
+    return ret_val::ServerIsUnreachable;
   }
 
-  int SendTerminationCancel(struct_TerminateCancel cancelation, void *context)
+  ret_val SendP2RSessionTerminationWarning(long time, long warning_id, int reason)
+  //int SendTermination(struct_TerminateWarning termination, void *context)
   {
-    if (!context)
+    if (!client)
     {
-      return -1;
+      return ret_val::Error;
     }
-    ::grpc::Status status = ((P2rClient *)context)->SendTerminationCancel(cancelation);
+    //::grpc::Status status = ((P2rClient *)context)->SendTermination(termination);
+    ::grpc::Status status = client->SendP2RSessionTerminationWarning( time, warning_id, reason);
     if (status.ok())
     {
-      return 0;
+      return ret_val::Success;
     }
-    return -2;
+    if (status.error_code() == grpc::DEADLINE_EXCEEDED || status.error_code() == grpc::UNAVAILABLE)
+    {
+      return ret_val::ServerIsUnreachable;
+    }
+    return ret_val::Error;
   }
 
-  int SendRetore(struct_RestoreWarning restoration, void *context)
+  ret_val SendP2RSessionTerminationWarningCancel(long warning_id)
+  // int SendTerminationCancel(struct_TerminateCancel cancelation, void *context)
   {
-    if (!context)
+    if (!client)
     {
-      return -1;
+      return ret_val::Error;
     }
-    ::grpc::Status status = ((P2rClient *)context)->SendRetore(restoration);
+    //::grpc::Status status = ((P2rClient *)context)->SendTerminationCancel(cancelation);
+    ::grpc::Status status = client->SendP2RSessionTerminationWarningCancel(warning_id);
     if (status.ok())
     {
-      return 0;
+      return ret_val::Success;
     }
-    return -2;
+    return ret_val::ServerIsUnreachable;
+  }
+
+  ret_val SendP2RSessionRestoreWarning(long time) 
+  //int SendRetore(struct_RestoreWarning restoration, void *context)
+  {
+    if (!client)
+    {
+      return ret_val::Error;
+    }
+    //::grpc::Status status = ((P2rClient *)context)->SendRetore(restoration);
+    ::grpc::Status status = client->SendP2RSessionRestoreWarning(time);
+    if (status.ok())
+    {
+      return ret_val::Success;
+    }
+    return ret_val::ServerIsUnreachable;
   }
 }

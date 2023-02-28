@@ -58,4 +58,14 @@ typedef struct _ApiCallTable
     SessionRestoreCallback restore_callback;
 } ApiCallTable;
 
+typedef enum _ret
+{
+    Success = 0,
+    NotEnoughMemory = 1,
+    TransportInitError = 2,
+    ServerIsUnreachable = 3,
+    EncodingError = 4,
+    Error = 5
+} ret_val;
+
 #endif
