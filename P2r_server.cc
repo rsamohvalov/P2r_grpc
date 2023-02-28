@@ -5,7 +5,7 @@
 
 #include "protobuf/classes/P2r.grpc.pb.h"
 
-#include "api/P2r_api.h"
+#include "api/P2r_server_api.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -26,29 +26,37 @@ class P2rServer final : public p2r::P2R::Service
   private:
     ApiCallTable api_callbacks;
     int rm_id;
+    int proto_major = 1;
+    int proto_minor = 0;
 
   public:
-    void SetApiCallbacks(ApiCallTable callbacks)
+    void SetApiCallbacks(ApiCallTable *callbacks)
     {
-      if (callbacks.speed_notify_callback)
+      if (callbacks->speed_notify_callback)
       {
-        api_callbacks.speed_notify_callback = callbacks.speed_notify_callback;
+        api_callbacks.speed_notify_callback = callbacks->speed_notify_callback;
+      }
+      if (callbacks->terminate_callback)
+      {
+        api_callbacks.terminate_callback = callbacks->terminate_callback;
+      }
+      if (callbacks->terminate_cancel_callback)
+      {
+        api_callbacks.terminate_cancel_callback = callbacks->terminate_cancel_callback;
+      }
+      if (callbacks->restore_callback)
+      {
+        api_callbacks.restore_callback = callbacks->restore_callback;
       }
   }
   void SetId( int id ) {
       rm_id = id;
   }
-  void FillHeader(struct_ConnectionId* s_id, ConnectionId id ) {
-    s_id->ProtocolVersion.major = id.protocol_version().major();
-    s_id->ProtocolVersion.minor = id.protocol_version().minor();
-    s_id->fp_id = id.fp_id();
-    s_id->rm_id = rm_id;
-  }
-      
+        
   Status P2rTerminateWarning(ServerContext *context, const TerminateWarning *request, Response *response) override
   {
     struct_TerminateWarning terminate;
-    FillHeader(&(terminate.connection_id), request->connection_id());
+    
     if( !api_callbacks.terminate_callback(terminate) ) {
       response->set_cause(p2r::SUCCESS);
       ConnectionId id;
@@ -68,21 +76,21 @@ class P2rServer final : public p2r::P2R::Service
   Status P2rTerminateWarningCancel(ServerContext *context, const TerminateCancel *request, ::google::protobuf::Empty *response) override
   {
     struct_TerminateCancel cancel;
-    FillHeader(&(cancel.connection_id), request->connection_id());
+    
     api_callbacks.terminate_cancel_callback(cancel);
     return Status::OK;
   }
   Status P2rRestoreWarning(ServerContext *context, const RestoreWarning *request, ::google::protobuf::Empty *response) override
   {
     struct_RestoreWarning restore;
-    FillHeader(&(restore.connection_id), request->connection_id());
+    
     api_callbacks.restore_callback(restore);
     return Status::OK;
   }
   Status P2rSpeedLevelNotification(ServerContext *context, const SpeedNotification *request, ::google::protobuf::Empty *response) override
   {
     struct_SpeedNotification speed_notify;
-    FillHeader(&(speed_notify.connection_id), request->connection_id());
+    
     api_callbacks.speed_notify_callback(speed_notify);
     return Status::OK;
   }
@@ -90,20 +98,21 @@ class P2rServer final : public p2r::P2R::Service
 
 extern "C" 
 {
-  int RunServer(char *addr, ApiCallTable *callbacks, int id)
+  int InitServer(char *addr, unsigned short port, int id, ApiCallTable *callbacks)
   {
     if (!addr)
     {
       return -1;
     }
-    if (!callbacks || !callbacks->speed_notify_callback)
+    if (!callbacks || !callbacks->speed_notify_callback || !callbacks->terminate_callback || !callbacks->terminate_cancel_callback || !callbacks->restore_callback)
     {
       return -2;
     }
     std::string server_address(addr);
-
+    server_address += ":" + std::to_string(port);
+    
     P2rServer service;
-    service.SetApiCallbacks(*callbacks);
+    service.SetApiCallbacks(callbacks);
     service.SetId(id);
 
     ServerBuilder builder;
@@ -111,7 +120,7 @@ extern "C"
     builder.RegisterService(&service);
 
     std::unique_ptr<Server> server(builder.BuildAndStart());
-    std::cout << "Server listening on port: " << server_address << std::endl;
+    std::cout << "Server listening on: " << server_address << std::endl;
 
     server->Wait();
     return 0;
