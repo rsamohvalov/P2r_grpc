@@ -5,7 +5,10 @@
 
 #include "../protobuf/classes/P2r.grpc.pb.h"
 
+extern "C"
+{
 #include "../api/P2r_server_api.h"
+}
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -162,5 +165,5 @@ extern "C"
     }
     return ret_val::Success;
   }
-  
+
 }

@@ -4,7 +4,10 @@
 
 #include "../protobuf/classes/P2r.grpc.pb.h"
 
+extern "C"
+{
 #include "../api/P2r_client_api.h"
+}
 
 using grpc::Channel;
 using grpc::ClientContext;

@@ -46,3 +46,6 @@ typedef struct _ServerParameters
     char addr[64];
     ApiCallTable *callbacks;
 } ServerParameters;
+
+ret_val InitServer(char *addr, unsigned short port, int id, ApiCallTable *callbacks);
+ret_val StopServer();
