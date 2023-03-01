@@ -55,12 +55,11 @@ int main(int argc, char *argv[])
     }
     
     //Какой-то код   
-    sleep(10);
     /////////////
 
     //Стоп
-    ret_val ret = StopServer();
-    printf("StopServer ret = %d\n", ret);
+    //ret_val ret = StopServer();
+    //printf("StopServer ret = %d\n", ret);
 
     pthread_join(server_thread, 0);
     return 0;
