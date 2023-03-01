@@ -139,7 +139,7 @@ extern "C"
 
   ret_val P2rClientRelease()
   {
-    std::cout << "Release clien\n";
+    std::cout << "Release client\n";
     if (client)
     {      
       if( client->connId ) {

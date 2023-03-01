@@ -33,12 +33,12 @@ add_custom_command(
 
 include_directories("../../protobuf/classes/")
 
-add_library( P2r STATIC
+add_library( P2r SHARED
              lib/P2r_client.cc 
              lib/P2r_server.cc 
              ${p2r_proto_srcs} 
              ${p2r_grpc_srcs})
-target_link_libraries(P2r 
+target_link_libraries(P2r PUBLIC
                       ${_REFLECTION}
                       ${_GRPC_GRPCPP}
                       ${_PROTOBUF_LIBPROTOBUF})
