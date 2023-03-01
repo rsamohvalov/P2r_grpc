@@ -1,12 +1,12 @@
 #ifndef _P2R_API_H
 #define _P2R_API_H
 
-typedef enum enum_TerminateReason
+typedef enum 
 {
     UNKNOWN = 0,
     PLANNED = 1,
     UNPLANNED = 2
-} enum_TerminateReason;
+} tReason;
 
 typedef enum _ret
 {
@@ -19,3 +19,12 @@ typedef enum _ret
 } ret_val;
 
 #endif
+
+
+
+
+
+
+
+
+

@@ -45,7 +45,7 @@ public:
     ::grpc::ClientContext context;
     ::google::protobuf::Empty response;
     ::grpc::Status status = stub_->P2rSpeedLevelNotification(&context, speed_notify, &response);
-    speed_notify.release_connection_id();
+    ConnectionId* cid = speed_notify.release_connection_id();
     return status;
   }
 
@@ -60,7 +60,7 @@ public:
     //std::cout << "client SendP2RSessionTerminationWarning\n";
     ::grpc::Status status = stub_->P2rTerminateWarning(&context, terminate, &response);
     //std::cout << "client after SendP2RSessionTerminationWarning: " << status.error_message() << " \n";
-    terminate.release_connection_id();
+    ConnectionId *cid = terminate.release_connection_id();
     if (status.ok())
     {
       //std::cout << "client SendP2RSessionTerminationWarning status OK\n";
@@ -84,7 +84,7 @@ public:
     cancel.set_warning_id(warning_id);
     //std::cout << "client SendP2RSessionTerminationWarningCancel\n";
     ::grpc::Status status = stub_->P2rTerminateWarningCancel(&context, cancel, &response);
-    cancel.release_connection_id();
+    ConnectionId *cid = cancel.release_connection_id();
     return status;
   }
 
@@ -95,7 +95,7 @@ public:
     restore.set_timeout(time);
     restore.set_allocated_connection_id(connId);
     ::grpc::Status status = stub_->P2rRestoreWarning(&context, restore, &response);
-    restore.release_connection_id();
+    ConnectionId *cid = restore.release_connection_id();
     return status;
   }
 
@@ -140,7 +140,7 @@ extern "C"
     if (client)
     {      
       if( client->connId ) {
-        client->connId->release_protocol_version(); 
+        ConnectionId_ProtocolVersion* proto = client->connId->release_protocol_version();
         delete client->connId;
       }
       if (client->protoVersion)

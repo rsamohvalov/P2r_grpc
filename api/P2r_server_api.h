@@ -1,5 +1,6 @@
 #include "P2r_api.h"
 
+
 typedef struct _TerminateWarning
 {
     int fp_id;
@@ -38,3 +39,10 @@ typedef struct _ApiCallTable
     SessionRestoreCallback restore_callback;
 } ApiCallTable;
 
+typedef struct _ServerParameters
+{
+    int id;
+    unsigned short port;
+    char addr[64];
+    ApiCallTable *callbacks;
+} ServerParameters;
