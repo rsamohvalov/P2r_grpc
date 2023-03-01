@@ -15,7 +15,11 @@ typedef enum _ret
     TransportInitError = 2,
     ServerIsUnreachable = 3,
     EncodingError = 4,
-    Error = 5
+    Error = 5,
+    ClientAlreadyInitialized = 6,
+    ServerAlreadyInitialized = 7,
+    ParameterError = 8,
+    NoService = 9
 } ret_val;
 
 #endif

@@ -34,8 +34,8 @@ add_custom_command(
 include_directories("../../protobuf/classes/")
 
 add_library( P2r STATIC
-             P2r_client.cc 
-             P2r_server.cc 
+             lib/P2r_client.cc 
+             lib/P2r_server.cc 
              ${p2r_proto_srcs} 
              ${p2r_grpc_srcs})
 target_link_libraries(P2r 
@@ -47,8 +47,8 @@ target_include_directories(P2r
         api
 )
 
-add_executable( P2r_example
-  P2r_example.c api/P2r_client_api.c api/P2r_server_api.c) 
+#add_executable( P2r_example
+#  P2r_example.c api/P2r_client_api.c api/P2r_server_api.c) 
 
  add_executable( P2r_server_example
   P2r_server_example.c api/P2r_server_api.c) 
@@ -56,8 +56,8 @@ add_executable( P2r_example
  add_executable( P2r_client_example
  P2r_client_example.c api/P2r_client_api.c) 
 
-target_link_libraries( P2r_example
-  P2r )
+#target_link_libraries( P2r_example
+#  P2r )
 target_link_libraries( P2r_server_example
   P2r )
 target_link_libraries( P2r_client_example

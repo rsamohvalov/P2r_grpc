@@ -53,9 +53,15 @@ int main(int argc, char *argv[])
     {
         perror("could not create thread");
     }
-    else
-    {
-        pthread_join(server_thread, 0);
-    }
+    
+    //Какой-то код   
+    sleep(10);
+    /////////////
+
+    //Стоп
+    ret_val ret = StopServer();
+    printf("StopServer ret = %d\n", ret);
+
+    pthread_join(server_thread, 0);
     return 0;
 }

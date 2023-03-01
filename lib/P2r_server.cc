@@ -3,9 +3,9 @@
 
 #include <string>
 
-#include "protobuf/classes/P2r.grpc.pb.h"
+#include "../protobuf/classes/P2r.grpc.pb.h"
 
-#include "api/P2r_server_api.h"
+#include "../api/P2r_server_api.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -112,33 +112,55 @@ class P2rServer final : public p2r::P2R::Service
   }
 };
 
-extern "C" 
+P2rServer* service;
+std::unique_ptr<Server> server = nullptr;
+
+extern "C"
 {
-  int InitServer(char *addr, unsigned short port, int id, ApiCallTable *callbacks)
+  ret_val InitServer(char *addr, unsigned short port, int id, ApiCallTable *callbacks)
   {
+  
+    if( server != nullptr ) {
+        return ret_val::ServerAlreadyInitialized;
+    }
     if (!addr)
     {
-      return -1;
+      return ret_val::ParameterError;
     }
     if (!callbacks || !callbacks->speed_notify_callback || !callbacks->terminate_callback || !callbacks->terminate_cancel_callback || !callbacks->restore_callback)
     {
-      return -2;
+      return ret_val::ParameterError;
     }
     std::string server_address(addr);
     server_address += ":" + std::to_string(port);
-    
-    P2rServer service;
-    service.SetApiCallbacks(callbacks);
-    service.SetId(id);
+
+    service = new P2rServer();
+    service->SetApiCallbacks(callbacks);
+    service->SetId(id);
 
     ServerBuilder builder;
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
+    builder.RegisterService(service);
 
-    std::unique_ptr<Server> server(builder.BuildAndStart());
+    server = builder.BuildAndStart();
     std::cout << "Server listening on: " << server_address << std::endl;
 
     server->Wait();
-    return 0;
+    return ret_val::Success;
   }
+
+  ret_val StopServer() {
+    if( server != nullptr ) {
+      if( service ) {
+        delete service;
+      }
+      server->Shutdown();
+      server = nullptr;
+    }
+    else {
+      return ret_val::NoService;
+    }
+    return ret_val::Success;
+  }
+  
 }

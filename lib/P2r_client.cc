@@ -2,9 +2,9 @@
 
 #include <string>
 
-#include "protobuf/classes/P2r.grpc.pb.h"
+#include "../protobuf/classes/P2r.grpc.pb.h"
 
-#include "api/P2r_client_api.h"
+#include "../api/P2r_client_api.h"
 
 using grpc::Channel;
 using grpc::ClientContext;
@@ -113,7 +113,7 @@ extern "C"
   //void *RunClient(char *addr, int fp_id)
   {
     if( client ) {
-      return ret_val::TransportInitError;
+      return ret_val::ClientAlreadyInitialized;
     }
     std::string target_address{server};
     
